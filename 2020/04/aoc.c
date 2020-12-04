@@ -207,7 +207,9 @@ main(int argc, char **argv)
 
     unsigned mask = (~(1<<FLD_CID)) & ((1<<FLD_N) - 1);
 
-#define FAIL(msg) { printf(msg "\n"); continue; }
+// #define FAIL(msg) { printf(msg "\n"); continue; }
+#define FAIL(msg) continue
+
     for (cr = table; cr; cr = cr->next)
     {
         n_records++;
@@ -216,26 +218,22 @@ main(int argc, char **argv)
 
         n_complete++;
 
-        printf("check %s : %s\n", fieldnames[FLD_BYR], cr->fields[FLD_BYR]);
         /*  byr (Birth Year) - four digits; at least 1920 and at most 2002. */
         if (strlen(cr->fields[FLD_BYR]) != 4) FAIL("BYR length");
         long byr = strtol(cr->fields[FLD_BYR], NULL, 10);
         if ((byr < 1920) || (byr > 2002)) FAIL("BYR content");
 
-        printf("check %s : %s\n", fieldnames[FLD_IYR], cr->fields[FLD_IYR]);
         /* iyr (Issue Year) - four digits; at least 2010 and at most 2020. */
         if (strlen(cr->fields[FLD_IYR]) != 4) FAIL("IYR length");
         long iyr = strtol(cr->fields[FLD_IYR], NULL, 10);
         if ((iyr <2010) || (iyr > 2020)) FAIL("IYR content");
 
-        printf("check %s : %s\n", fieldnames[FLD_EYR], cr->fields[FLD_EYR]);
         /* eyr (Expiration Year) - four digits; at least 2020 and at most 2030. */
         if (strlen(cr->fields[FLD_EYR]) != 4) FAIL("EYR length");
         long eyr = strtol(cr->fields[FLD_EYR], NULL, 10);
         if ((eyr <2020) || (eyr > 2030)) FAIL("EYR content");
 
 
-        printf("check %s : %s\n", fieldnames[FLD_HGT], cr->fields[FLD_HGT]);
         /* hgt (Height) - a number followed by either cm or in:
          * If cm, the number must be at least 150 and at most 193.
          *  If in, the number must be at least 59 and at most 76.
@@ -256,7 +254,6 @@ main(int argc, char **argv)
             FAIL("HGT UNIT");
         }
 
-        printf("check %s : %s\n", fieldnames[FLD_HCL], cr->fields[FLD_HCL]);
         /* hcl (Hair Color) - a # followed by exactly six characters 0-9 or a-f. */
         if (strlen(cr->fields[FLD_HCL]) != 7) FAIL("HCL length");
         if (cr->fields[FLD_HCL][0] != '#') FAIL("HCL prefix");
@@ -268,7 +265,6 @@ main(int argc, char **argv)
         }
         if (! hcl_ok) FAIL("HCL content");
 
-        printf("check %s : %s\n", fieldnames[FLD_ECL], cr->fields[FLD_ECL]);
         /* ecl (Eye Color) - exactly one of: amb blu brn gry grn hzl oth. */
         bool ecl_ok = false;
         for (size_t i=0; i<(sizeof(eyecolors) / sizeof(eyecolors[0])); ++i)
@@ -281,7 +277,6 @@ main(int argc, char **argv)
         }
         if (! ecl_ok) FAIL("ECL content");
 
-        printf("check %s : %s\n", fieldnames[FLD_PID], cr->fields[FLD_PID]);
         /*  pid (Passport ID) - a nine-digit number, including leading zeroes. */
         if (strlen(cr->fields[FLD_PID]) != 9) continue;
         bool pid_ok = true;
@@ -294,7 +289,6 @@ main(int argc, char **argv)
         if (! pid_ok) FAIL("PID content");
 
         /* cid (Country ID) - ignored, missing or not. */
-        printf("---- OK\n");
         n_valid++;
     }
 
