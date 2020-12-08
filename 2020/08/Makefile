@@ -1,5 +1,5 @@
-#CFLAGS+=-g -O3
-#CXXFLAGS+=-g -O3
+CFLAGS+=-g -O3
+CXXFLAGS+=-g -O3
 
 all: aocpp
 
