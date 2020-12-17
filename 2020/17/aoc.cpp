@@ -199,6 +199,12 @@ class Map
 
         bool test(const Coord<N>& where) const
         {
+            for (size_t i=0; i<N; ++i)
+            {
+                if (where[i] < min[i]) return false;
+                if (where[i] > max[i]) return false;
+            }
+
             try
             {
                 return m_Map.at(where);
