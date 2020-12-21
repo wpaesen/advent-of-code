@@ -317,8 +317,9 @@ class Tile : public std::enable_shared_from_this<Tile>
         }
 
         /* Get the edge pattern, normalized according to the specified xfrm
-         * This might be more efficient.q
-         * */
+         * There might be a more efficient way of doing this with the saved edges,
+         * but this will do for now.
+         */
         std::bitset<10> getTransformedEdge(Edge i, const Xfrm& xfrm )
         {
             std::bitset<10> ret;
@@ -806,7 +807,15 @@ class Image
             {
                 for (size_t x=0; x<grid_size*8; ++x)
                 {
-                    std::cout << pointM(x, y, monsters);
+                    char p = pointM(x, y, monsters);
+                    if (p == 'O')
+                    {
+                        std::cout << "\033[91m" << p << "\033[m";
+                    }
+                    else
+                    {
+                        std::cout << "\033[96m" << p << "\033[m";
+                    }
                 }
                 std::cout << std::endl;
             }
