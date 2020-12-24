@@ -1,7 +1,10 @@
 CFLAGS+=-g -O3
 CXXFLAGS+=-g -O3
 
-all: aocpp
+all: aocpp aoc
 
 aocpp: aoc.cpp
 	$(CXX) $(CXXFLAGS) -o aocpp aoc.cpp -lpthread
+
+aoc: aoc.c
+	$(CC) $(CFLAGS) -o aoc aoc.c
