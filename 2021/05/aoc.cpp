@@ -231,7 +231,7 @@ main(int argc, char **argv)
     }
 
     // grid.drawGrid();
-    std::cout << "Number of safe points : " << grid.getSafePoints() << std::endl;
+    std::cout << "Number of most dangerous points : " << grid.getSafePoints() << std::endl;
 
     for ( auto& l : lines )
     {
@@ -242,7 +242,7 @@ main(int argc, char **argv)
     }
 
     // grid.drawGrid();
-    std::cout << "Number of safe points : " << grid.getSafePoints() << std::endl;
+    std::cout << "Number of most dangerous safe points : " << grid.getSafePoints() << std::endl;
 
     return 0;
 }
