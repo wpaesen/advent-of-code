@@ -9,13 +9,13 @@
 #include <stdexcept>
 #include <iomanip>
 #include <list>
-// 386755
+#include "bigint.h"
 
 class MotherFish
 {
 public:
 
-    using valueType = unsigned __int128;
+    using valueType = bigint;
 
     MotherFish()
     {
@@ -61,27 +61,6 @@ public:
         return ret;
     }
 
-    std::string amountAsString()
-    {
-        std::string ret;
-
-        valueType value = amount();
-        while (value > 0)
-        {
-            std::array<char, 3> buf;
-
-            unsigned digit = value % 10;
-            value = value / 10;
-
-            std::snprintf(buf.data(), buf.size(), "%u", digit);
-            ret.append(buf.data());
-        }
-
-        std::reverse(ret.begin(), ret.end());
-
-        return ret;
-    }
-
 private:
 
     std::array<valueType, 7> spawn;
@@ -117,13 +96,13 @@ main(int argc, char **argv)
         exit(-1);
     }
 
-    for ( size_t i=0; i<=1000; ++i )
+    for ( size_t i=0; i<=10000; ++i )
     {   
         mothers.tick();
 
-        if ( ( i== 80) || ( i == 256) || ( i == 1000 ) )
+        if ( ( i== 80) || ( i == 256) || ( i == 1000 ) || ( i == 10000 ) )
         {
-            std::cout << "After " << i << " days : " << mothers.amountAsString() << std::endl;
+            std::cout << "After " << i << " days : " << mothers.amount() << std::endl;
         }
     }
 
