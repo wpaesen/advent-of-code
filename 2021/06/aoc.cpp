@@ -13,22 +13,23 @@
 class MotherFish
 {
 public:
-    MotherFish(int a_state = 0)
+    MotherFish()
     {
-        if ( state >= spawn.size())
-        {
-            throw std::invalid_argument("Invalid initial state");
-        }
+       
 
         spawn.fill(0);
-        spawn[0] = 1;
-        state = a_state;
+        state = 0;
         for (size_t i=0;i<9; ++i) children.push_back(0);
     }
 
-    void addMother()
+    void addMother(int initialstate)
     {
-        spawn[0] += 1;
+        int position = spawn.size() - initialstate - 1;
+        if ( position >= spawn.size())
+        {
+            throw std::invalid_argument("Invalid initial state");
+        }
+        spawn[position] += 1;
     }
 
     void tick()
@@ -74,7 +75,7 @@ main(int argc, char **argv)
         exit(-1);
     }
 
-    std::map<int, MotherFish> mothers;
+    MotherFish mothers;
 
     try
     {
@@ -84,16 +85,7 @@ main(int argc, char **argv)
         while (std::getline(infile, line, ','))
         {
             int value = std::stoi(line);
-
-            auto j = mothers.find(value);
-            if (j == mothers.end())
-            {
-                mothers[value] = MotherFish(value);
-            }
-            else
-            {
-                j->second.addMother();
-            }
+            mothers.addMother(value);
         }
     }
     catch(std::exception& e)
@@ -102,27 +94,13 @@ main(int argc, char **argv)
         exit(-1);
     }
 
-    if (mothers.empty())
-    {
-        std::cerr << "Reading data error : NO DATA" << std::endl;
-    }
-
     for ( size_t i=0; i<256; ++i )
     {   
-        for (auto& f : mothers)
-        {
-            f.second.tick();
-        }
+        mothers.tick();
 
         if ( ( ( i+1 ) == 80) || ( ( i+1 ) == 256) )
         {
-            int64_t amount = 0;
-            for (auto& f : mothers)
-            {
-                amount += f.second.amount();
-            }
-
-            std::cout << "After " << i+1 << " days : " << amount << std::endl;
+            std::cout << "After " << i+1 << " days : " << mothers.amount() << std::endl;
         }
     }
 
