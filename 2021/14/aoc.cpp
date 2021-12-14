@@ -85,8 +85,13 @@ public:
         }
     }
 
-    std::map<char, int64_t> subsitute(const std::string& poly, int iterations)
+    std::vector<std::pair<int, int64_t>> countScores(const std::string& poly, const std::vector<int>& a_iterations)
     {
+        std::vector<std::pair<int, int64_t>> ret;
+
+        std::vector<int> iterations( a_iterations );
+        std::sort(iterations.begin(), iterations.end());
+
         std::map<Rule*, int64_t> pairs;
 
         /* Find all pairs */
@@ -99,39 +104,34 @@ public:
             }
         }
 
-        while (iterations-- > 0)
+        int i = 0;
+        for (auto& step : iterations )
         {
-            pairs = substitute(pairs);
-        }
+            while ( i < step )
+            {
+                pairs = substitute(pairs);
+                i++;
+            }
 
-        std::map<char, int64_t> ret;
+            std::map<char, int64_t> tally;
 
-        ret[*poly.begin()] += 1;
-        ret[*poly.rbegin()] += 1;
+            tally[*poly.begin()] += 1;
+            tally[*poly.rbegin()] += 1;
 
-        for (auto& i : pairs)
-        {
-            ret[i.first->first] += i.second;
-            ret[i.first->second] += i.second;
-        }
+            for (auto& j : pairs)
+            {
+                tally[j.first->first] += j.second;
+                tally[j.first->second] += j.second;
+            }
 
-        for (auto& i: ret)
-        {
-            i.second /= 2;
+            auto mm = std::minmax_element(tally.cbegin(), tally.cend(), [](auto& a, auto& b) {
+                return a.second < b.second;
+            });
+
+            ret.emplace_back(i, (mm.second->second - mm.first->second)/2);
         }
 
         return ret;
-    }
-
-    int64_t countScore(const std::string& poly, int iterations)
-    {
-        auto tally = subsitute(poly, iterations);
-
-        auto mm = std::minmax_element(tally.cbegin(), tally.cend(), [](auto& a, auto& b) {
-            return a.second < b.second;
-        });
-
-        return mm.second->second - mm.first->second;
     }
 
 private:
@@ -193,8 +193,12 @@ main(int argc, char **argv)
 
     ruleset.resolve();
 
-    std::cout << "10 iterations " << ruleset.countScore(basepoly, 10) << std::endl;
-    std::cout << "40 iterations " << ruleset.countScore(basepoly, 40) << std::endl;
+    auto rets = ruleset.countScores(basepoly, {10, 40});
+
+    for (auto& r : rets)
+    {
+        std::cout << r.first << " iterations " << r.second << std::endl;
+    }
 
     return 0;
 }
