@@ -14,6 +14,7 @@
 #include <chrono>
 #include <cmath>
 #include <string_view>
+#include <set>
 
 class Node : public std::enable_shared_from_this<Node>
 {
@@ -136,14 +137,14 @@ public:
 
         while ( ! unvisited.empty() ) 
         {
-            std::shared_ptr<Node> c;
-
-            unvisited.sort([](std::shared_ptr<Node>& a, std::shared_ptr<Node>& b) {
+            auto l = std::min_element(unvisited.begin(), unvisited.end(), [](std::shared_ptr<Node>& a, std::shared_ptr<Node>& b) 
+            {
                 return a->lowest < b->lowest;
             });
 
-            c = unvisited.front();
-            unvisited.pop_front();
+            std::shared_ptr<Node> c = *l;
+
+            unvisited.erase(l);
 
             for (auto &n : neighours)
             {
