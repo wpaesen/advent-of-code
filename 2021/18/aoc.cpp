@@ -335,8 +335,21 @@ std::shared_ptr<Number> Number::parse(std::string::const_iterator& pos, const st
 
 std::shared_ptr<Number> operator+( std::shared_ptr<Number> lhs, std::shared_ptr<Number> rhs )
 {
-    std::shared_ptr<Pair> ret = std::make_shared<Pair>(lhs->clone(), rhs->clone());
-    return Number::reduce(ret);
+    if ((lhs) && (rhs))
+    { 
+        std::shared_ptr<Pair> ret = std::make_shared<Pair>(lhs->clone(), rhs->clone());
+        return Number::reduce(ret);
+    }
+    if (lhs)
+    {
+        return lhs->clone();
+    }
+    if (rhs)
+    {
+        return rhs->clone();
+    }
+
+    return std::shared_ptr<Number>();
 }
 
 int
@@ -376,14 +389,7 @@ main(int argc, char **argv)
 
     for (auto i = homework.begin(); i != homework.end(); ++i)
     {
-        if (! sum)
-        {
-            sum = *i;
-        }
-        else
-        {
-            sum = sum + *i;
-        }
+        sum = sum + *i;
     }
 
     std::cout << "Cumulative magnitude " << sum->magnitude() << std::endl;
