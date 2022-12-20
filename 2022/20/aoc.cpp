@@ -16,11 +16,13 @@
 #include <atomic>
 #include <list>
 #include <future>
+#include <functional>
 
 class Node
 {
 public:
     Node(int64_t a_value, int64_t a_operations) : value(a_value), operations(a_operations), position(0), next(nullptr), prev(nullptr) {}
+    Node(const Node& other) : value(other.value), operations(other.operations), position(other.position), next(nullptr), prev(nullptr) {};
 
     operator Node*() { return this; };
 
@@ -48,23 +50,6 @@ public:
         next = UB;
 
         UB->prev = this;
-    }
-
-    void skipBackward()
-    {
-        Node* LB = prev->prev;
-        Node* UB = next;
-        Node* other = prev;
-
-        LB->next = this;
-
-        prev = LB;
-        next = other;
-
-        other->prev = this;
-        other->next = UB;
-
-        UB->prev = other;  
     }
 
     void setNext(Node *nnext)
@@ -115,66 +100,59 @@ public:
         }
     }
 
-    void decrypt(std::size_t n_rounds = 1)
+    const Work& decrypt(std::size_t n_rounds = 1)
     {
-        std::list<Node*> todo;
-
         for (auto i = nodes.begin(); i != std::prev(nodes.end()); i = std::next(i))
         {
             auto j = std::next(i);
 
             i->setNext(*j);
         }
-
         nodes.rbegin()->setNext(*nodes.begin());
-
-       
-        for (auto &n : nodes)
-        {
-            todo.push_back(n);
-        }
 
         for (std::size_t round = 0; round < n_rounds; ++round)
         {
-            for (auto& t : todo)
+            for (auto& n : nodes)
             {
-                if (t->getOperations() > 0)
+                for (int i=0; i<n.getOperations(); ++i)
                 {
-                    for (int i=0; i<t->getOperations(); ++i)
-                    {
-                        t->skipForward();
-                    }
-                }
-                else
-                {
-                    for (int i=0; i>t->getOperations(); --i)
-                    {
-                        t->skipBackward();
-                    }
+                    n.skipForward();
                 }
             }
         }
 
-        Node* root = getRoot();
-        int i = 0;
-        Node* iter = root;
-        do {
-            iter->setPosition(i++);
-            iter = iter->next;
-        } while (iter != root);
+        std::vector<Node> result;
+        result.reserve(nodes.size());
 
-        std::sort(nodes.begin(), nodes.end(), [](const Node& a , const Node& b) {
-            return a.getPosition() < b.getPosition();
-        });
+        for (auto i = getRoot(); result.size() < nodes.size(); i = i->next)
+        {
+            result.emplace_back(*i);
+        }
+
+        std::swap(nodes, result);
+
+        return *this;
     }
         
     std::array<int64_t, 3> getCoordinates() const
     {
         std::array<int64_t, 3> ret;
 
-        ret[0] = nodes[1000 % nodes.size()].getValue();
-        ret[1] = nodes[2000 % nodes.size()].getValue();
-        ret[2] = nodes[3000 % nodes.size()].getValue();
+        for (std::size_t i=0; i<3; ++i)
+        {
+            ret[i] = nodes[((i+1) *1000) % nodes.size()].getValue();
+        }
+
+        return ret;
+    }
+
+    int64_t getCoordinatesSum() const
+    {
+        int64_t ret = 0;
+        for (auto& c : getCoordinates())
+        {
+            ret += c;
+        }
 
         return ret;
     }
@@ -201,25 +179,8 @@ private:
 
         return nullptr;
     }
-    void printDbg(std::ostream& os)
-    {
-        const Node* root = getRoot();
-
-        if (! root)
-        {
-            os << "NOROOT";
-            return;
-        }
-
-        const Node* iter = root;
-        do {
-            os << iter->getValue() << " ";
-            iter = iter->next;
-        } while (iter != root);
-    }
 
     std::vector<Node> nodes;
-    std::vector<Node*> work;
 };
 
 int
@@ -252,23 +213,8 @@ main(int argc, char **argv)
         std::exit(-1);
     }
 
-    {
-        Work work(numbers);
-        work.decrypt();
-    
-        auto partA = work.getCoordinates();
-
-        std::cout <<"Cosum A " << partA[0] + partA[1] + partA[2] << std::endl;
-    }
-
-    if (true) {
-        Work work(numbers, 811589153);
-        work.decrypt(10);
-
-        auto partB = work.getCoordinates();
-
-        std::cout <<"Cosum B " << partB[0] + partB[1] + partB[2] << std::endl;
-    }
+    std::cout <<"Cosum A " << Work(numbers).decrypt().getCoordinatesSum() << std::endl;
+    std::cout <<"Cosum B " << Work(numbers, 811589153).decrypt( 10 ).getCoordinatesSum() << std::endl;
 
     return 0;
 }
